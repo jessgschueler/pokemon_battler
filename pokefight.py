@@ -20,21 +20,6 @@ class Pokemon():
         self.speed = speed
     pass
 
-# pokemon1 = Pokemon(poke_1, poke_df.at[poke_1, "hp"], poke_df.at[poke_1, "attack"], poke_df.at[poke_1, "defense"], poke_df.at[poke_1, "speed"])
-# pokemon2 = Pokemon(poke_2, poke_df.at[poke_2, "hp"], poke_df.at[poke_2, "attack"], poke_df.at[poke_2, "defense"], poke_df.at[poke_2, "speed"])
-
-# p1_name = pokemon1.name
-# p2_name = pokemon2.name
-# p1_hp = pokemon1.hp
-# p2_hp = pokemon2.hp
-# p1_attack = pokemon1.attack
-# p2_attack = pokemon2.attack
-# p1_defense = pokemon1.defense
-# p2_defense = pokemon2.defense
-# p1_speed = pokemon1.speed
-# p2_speed = pokemon2.speed
-
-
 def p1_attacking(pokemon1, pokemon2):
     p1_dmg = (pokemon1.attack - pokemon2.defense)
     while pokemon1.hp > 0:
