@@ -1,5 +1,4 @@
 ## Pokemon Battler
-![Titlecard](https://i.imgur.com/3mrzwM1.png)
 ![test](./img/battler_trans.png)
 
 ### Contributors:
