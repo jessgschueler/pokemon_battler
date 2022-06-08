@@ -142,7 +142,9 @@ def poke_fight():
     if form.validate_on_submit() == True:
         poke_1 = form.poke_1.data
         poke_2 = form.poke_2.data
-        if poke_1 in poke_df.index and poke_2 in poke_df.index:
+        if poke_1 == poke_2:
+            message = f"{poke_1} won't fight another {poke_2}!"
+        elif poke_1 in poke_df.index and poke_2 in poke_df.index:
             pokemon1 = Pokemon(poke_1, poke_df.at[poke_1, "hp"], poke_df.at[poke_1, "attack"], poke_df.at[poke_1, "defense"], poke_df.at[poke_1, "speed"])
             pokemon2 = Pokemon(poke_2, poke_df.at[poke_2, "hp"], poke_df.at[poke_2, "attack"], poke_df.at[poke_2, "defense"], poke_df.at[poke_2, "speed"])
             message = poke_battle(pokemon1, pokemon2)
