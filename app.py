@@ -33,21 +33,20 @@ app = Flask(__name__)
 app.secret_key = 'somesecretkey'
 
 
-""" """
+""" before the page asks for user name"""
 @app.before_request
 def before_request(): 
     # makes user global so we can call on it in other places
     g.user = None
-
     if 'user_id' in session:
         # checks to see if we have the user in my data base
         user = [x for x in users if x.id == session['user_id']][0]
         # anywhere we have access to g (pretty much anywhere, we will have access to the user)
         g.user = user
 
-""" create a function to log the user in"""
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
+    """ create a function to log the user in"""
     if request.method == 'POST':
         # logs the user out if they dont complete the log in successfully 
         session.pop('user_id', None)
@@ -72,7 +71,7 @@ def login():
 """set route for profile """
 @app.route('/profile')
 def profile():
-    # 
+    """    sets route for the profile to attach to the template for it"""    
     return render_template('profile.html')
 
 
