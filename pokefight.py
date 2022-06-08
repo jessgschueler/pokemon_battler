@@ -117,7 +117,7 @@ def poke_battle(pokemon1, pokemon2):
     Pits two pokemon against each other, calling p1_attacking() & p2_attacking()
     """
     # Checks to make sure both pokemon have positive damage before while loop
-    if (pokemon2.attack - pokemon1.defense) > 0 and (pokemon2.attack - pokemon1.defense) > 0:
+    if (pokemon2.attack - pokemon1.defense) > 0 or (pokemon1.attack - pokemon2.defense) > 0:
         # Runs while both pokemon have positive health.
         while pokemon1.hp > 0 and pokemon2.hp > 0:
             # Determining which poke goes first by comparing speed
