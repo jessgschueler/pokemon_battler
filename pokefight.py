@@ -41,11 +41,12 @@ def df_drop_add(dataframe):
         inplace=True,
     )
     # Columns to add to dataframe
-    col_list=['wins','losses']
+    col_list=['wins','losses','times_chosen']
     for col in col_list:
         if col not in dataframe.columns:
             dataframe['wins']=0
             dataframe['losses']=0
+            dataframe['times_chosen']
         else:
             pass
     return dataframe
@@ -172,14 +173,18 @@ def poke_battle(pokemon1, pokemon2):
 
 def updater(pokemon1, pokemon2, str_message):
     """
-    Interprets return of poke_battler() and updates pandas df with win and loss data
+    Interprets return of poke_battler() and updates pandas df with win and loss data, as well as times chosen
     """
     if pokemon1.name in str_message:
         poke_df.at[pokemon1.name, "losses"] += 1
         poke_df.at[pokemon2.name, "wins"] += 1
+        poke_df.at[pokemon1.name, "times_chosen"] += 1
+        poke_df.at[pokemon2.name, "times_chosen"] += 1
     elif pokemon2.name in str_message:
         poke_df.at[pokemon2.name, "losses"] += 1
         poke_df.at[pokemon1.name, "wins"] += 1
+        poke_df.at[pokemon1.name, "times_chosen"] += 1
+        poke_df.at[pokemon2.name, "times_chosen"] += 1
     else:
         pass
 
@@ -190,6 +195,7 @@ app.config["SECRET_KEY"] = 'TQIcpo6gbADjldiP9o9XirAl0LliqYpw'
 
 Bootstrap(app)
 
+#Create a subclass of FlaskForm for our pokemon
 class PokemonForm(FlaskForm):
     poke_1 = StringField("Pokemon vs...", validators=[DataRequired()])
     poke_2 = StringField("...Pokemon", validators=[DataRequired()])
@@ -202,18 +208,22 @@ def poke_fight():
     """
     global poke_df
     form = PokemonForm()
+    #ensures our form has text input
     if form.validate_on_submit() == True:
         poke_1 = form.poke_1.data.title()
         poke_2 = form.poke_2.data.title()
+        #checks if the same pokemon was entered twice
         if poke_1 == poke_2:
             message = f"{poke_1} won't fight another {poke_2}!"
+        #checks to see if entered pokemon are in our database
         elif poke_1 in poke_df.index and poke_2 in poke_df.index:
             pokemon1 = Pokemon(poke_1, poke_df.at[poke_1, "hp"], poke_df.at[poke_1, "attack"], poke_df.at[poke_1, "defense"], poke_df.at[poke_1, "speed"])
             pokemon2 = Pokemon(poke_2, poke_df.at[poke_2, "hp"], poke_df.at[poke_2, "attack"], poke_df.at[poke_2, "defense"], poke_df.at[poke_2, "speed"])
+            #runs pokemon through our battler
             message = poke_battle(pokemon1, pokemon2)
-            print(message)
+            #update our dataframe with win/loss/chosen info
             updater(pokemon1, pokemon2, message)
-            print(poke_df)
+        #checks that valid pokemon were entered
         elif poke_1 in poke_df.index and poke_2 not in poke_df.index:
             message = f"{poke_2} is not a valid pokemon!"
         elif poke_1 not in poke_df.index and poke_2 in poke_df.index:
@@ -222,6 +232,7 @@ def poke_fight():
             message = f"{poke_1} and {poke_2} are not valid pokemon!"
     else:
         message = "Choose your Pokemon!"
+    #renders and displays html template
     return render_template('index.html', form=form, message=message)
 
 if __name__ == "__main__":
