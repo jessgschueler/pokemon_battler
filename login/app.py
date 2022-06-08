@@ -1,55 +1,60 @@
-from flask_login import LoginManager
-from flask import session, Flask, redirect, request, render_template, url_for
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import (
-    UserMixin,
-    login_user,
-    LoginManager,
-    current_user,
-    logout_user,
-    login_required,
-)
+from flask import (Flask, 
+                        g, 
+                        redirect, 
+                        render_template, 
+                        request, 
+                        session, 
+                        url_for)
 
 
-login_manager = LoginManager()
-login_manager.session_protection = "strong"
-login_manager.login_view = "login"
-login_manager.login_message_category = "info"
+class User:
+    def __init__(self, id, username, password):
+        self.id = id
+        self.username = username
+        self.password = password
 
+    def __repr__(self):
+        return f'<User: {self.username}>'
 
-db = SQLAlchemy()
-migrate = Migrate()
-bcrypt = Bcrypt()
+users = []
+users.append(User(id = 1, username = 'bri', password = 'password'))
+users.append(User(id = 2, username= 'jess', password = 'password'))
+users.append(User(id = 3, username= 'dylan', password = 'password'))
+users.append(User(id = 4, username= 'jarret', password = 'password'))
+
 
 
 app = Flask(__name__)
-# login manager contains code that lets app and login work together
-# login_manager = LoginManager()
-# # configure it
-# login_manager.init_app(app)
-# # set secret Key
-app.config["SECRET_KEY"] = 'TQIcpo6gbADjldiP9o9XirAl0LliqYpw'
-app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+app.secret_key = 'somesecretkey'
 
-login_manager.init_app(app)
-db.init_app(app)
-migrate.init_app(app, db)
-bcrypt.init_app(app)
-# Route for handling the login page logic
-@app.route('/')
-def index():
-    return 'you made it'
+@app.before_request
+def before_request():
+    g.user = None
 
-@app.route('/login', methods=['GET', 'POST'])
+    if 'user_id' in session:
+        user = [x for x in users if x.id == session['user_id']][0]
+        # anywhere we have access to g (pretty much anywhere, we will have access to the user)
+        g.user = user
+
+@app.route('/login', methods = ['GET', 'POST'])
 def login():
-    error = None
     if request.method == 'POST':
-        if request.form['username'] != 'admin' or request.form['password'] != 'admin':
-            error = 'Invalid Credentials. Please try again.'
-        else:
-            return redirect(url_for('home'))
-    return render_template('login.html', error=error)
+        session.pop('user_id', None)
 
-if __name__ == '__main__':
-    app.run('0.0.0.0', 8080)
+        username = request.form['username']
+        password = request.form['password']
+
+        user = [x for x in users if x.username == username][0]
+        if user and user.password == password:
+            session['user_id'] = user.id
+            return redirect(url_for('profile'))
+
+        return redirect(url_for('login'))   
+
+    return render_template('login.html')
+
+@app.route('/profile')
+def profile():
+    return render_template('profile.html')
+
+

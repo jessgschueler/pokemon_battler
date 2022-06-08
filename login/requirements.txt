@@ -1,0 +1,13 @@
+numpy==1.20.2
+pandas==1.2.4
+SQLAlchemy==1.4.13
+PyMySQL==1.0.2
+jupyterlab==3.0.14
+notebook==6.3.0
+jupyterthemes==0.20.0
+pyyaml==5.4.1
+psutil==5.9.1
+requests==2.27.1
+Flask-Login==0.6.1
+Flask-SQLAlchemy==2.5.1
+

@@ -1,0 +1,19 @@
+data:
+  historyOfSet: ../data/historyOfSet.csv
+  pricetest: ../data/pricetest.csv
+  db_user: loader
+db_pass: mypass
+db_host: 127.0.0.1:3306
+db_name: dsadeb_flights
+local: False
+project: ughh-347120
+dataset: airspace
+creds: /home/fossa/deb/data-engineering-bootcamp/tests/ughhh_ch3.json
+external_tables:
+  airports: 
+    bucket: hole-in-my
+    blob: deb-airports.csv
+  flights:  
+    bucket: hole-in-my
+    blob: deb-flights.csv
+drop_and_replace: True
