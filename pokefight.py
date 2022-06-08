@@ -48,26 +48,23 @@ def poke_battle(pokemon1, pokemon2):
         else:
             return f'{pokemon1.name} has fainted.'
             # Update P1 Losses and P2 Wins
-            break
         if pokemon2.hp > 0:
             p2_attacking(pokemon1, pokemon2)
         else:
             return f'{pokemon2.name} has fainted.'
             # Update P2 Losses and P1 Wins
-            break
+
     while pokemon2.speed > pokemon1.speed:
         if pokemon2.hp > 0:
             p2_attacking(pokemon1, pokemon2)
         else:
             return f'{pokemon2.name} has fainted.'
             # Update P2 Losses and P1 Wins
-            break
         if pokemon1.hp > 0:
             p1_attacking(pokemon1, pokemon2)
         else:
             return f'{pokemon1.name} has fainted.'
             # Update P1 Losses and P2 Wins
-            break
 
 
 app = Flask(__name__)
