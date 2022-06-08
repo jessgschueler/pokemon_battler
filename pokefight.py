@@ -104,9 +104,9 @@ def p2_attacking(pokemon1, pokemon2):
             pokemon1.hp = (pokemon1.hp - p2_dmg)
             print(f'Leaving {pokemon1.name} with {pokemon1.hp} hp')
             return pokemon1.hp
-
         # Catches if they do not have a damage of above 0    
         else:
+            print(f"{pokemon2.name}'s {p2_dmg} damage is not enough to damage {pokemon1.name}")
             return pokemon1.hp
     # allows the other pokemon to attack in poke_battle function
     else:
