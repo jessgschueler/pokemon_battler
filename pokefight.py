@@ -11,6 +11,47 @@ def df_import(csv_file):
 
 poke_df = df_import('pokemon.csv')
 
+def df_drop_add(dataframe):
+    """
+    ## df_drop_add(dataframe)
+    removes a specific list of columns & adds a 'wins' and 'losses' column
+
+    *dataframe:
+    - takes a pandas dataframe
+    """
+    # Columns to drop from dataframe
+    dataframe.drop(columns=[
+        'japanese_name',
+        'percent_male',
+        'percent_female',
+        'capture_rate',
+        'base_egg_steps',
+        'evochain_0',
+        'evochain_1',
+        'evochain_2',
+        'evochain_3',
+        'evochain_4',
+        'evochain_5',
+        'evochain_6',
+        'gigantamax',
+        'mega_evolution',
+        'mega_evolution_alt',
+    ],   
+        axis=1,
+        inplace=True,
+    )
+    # Columns to add to dataframe
+    col_list=['wins','losses']
+    for col in col_list:
+        if col not in dataframe.columns:
+            dataframe['wins']=0
+            dataframe['losses']=0
+        else:
+            pass
+    return dataframe
+
+poke_df = df_drop_add(poke_df)   
+
 class Pokemon():
     def __init__(self, name, hp, attack, defense, speed):
         self.name = name
@@ -29,7 +70,7 @@ def p1_attacking(pokemon1, pokemon2):
             print(f'Leaving {pokemon2.name} with {pokemon2.hp} hp')
             return pokemon2.hp
         else:
-            pass
+            print("oops")
 
 def p2_attacking(pokemon1, pokemon2):
     p2_dmg = (pokemon2.attack - pokemon1.defense)
@@ -39,6 +80,8 @@ def p2_attacking(pokemon1, pokemon2):
             pokemon1.hp = (pokemon1.hp - p2_dmg)
             print(f'Leaving {pokemon1.name} with {pokemon1.hp} hp')
             return pokemon1.hp
+        else:
+            print("bug")
 
 def poke_battle(pokemon1, pokemon2):
         # poke with most speed goes first, if the same p2 goes first
@@ -69,6 +112,15 @@ def poke_battle(pokemon1, pokemon2):
             # Update P1 Losses and P2 Wins
             break
 
+def updater(pokemon1, pokemon2, str_message):
+    if pokemon1.name in str_message:
+        poke_df.at[pokemon1.name, "wins"] += 1
+        poke_df.at[pokemon2.name, "losses"] += 1
+    elif pokemon2.name in str_message:
+        poke_df.at[pokemon2.name, "wins"] += 1
+        poke_df.at[pokemon1.name, "losses"] += 1
+    else:
+        pass
 
 app = Flask(__name__)
 
@@ -94,7 +146,10 @@ def poke_fight():
         if poke_1 in poke_df.index and poke_2 in poke_df.index:
             pokemon1 = Pokemon(poke_1, poke_df.at[poke_1, "hp"], poke_df.at[poke_1, "attack"], poke_df.at[poke_1, "defense"], poke_df.at[poke_1, "speed"])
             pokemon2 = Pokemon(poke_2, poke_df.at[poke_2, "hp"], poke_df.at[poke_2, "attack"], poke_df.at[poke_2, "defense"], poke_df.at[poke_2, "speed"])
+            print(pokemon1)
             message = poke_battle(pokemon1, pokemon2)
+            updater(pokemon1, pokemon2, message)
+            print(poke_df.head())
         elif poke_1 in poke_df.index and poke_2 not in poke_df.index:
             message = f"{poke_2} is not a valid pokemon!"
         elif poke_1 not in poke_df.index and poke_2 in poke_df.index:
