@@ -147,6 +147,12 @@ def poke_battle(pokemon1, pokemon2):
                     p1_attacking(pokemon1, pokemon2)
                 else:
                     return f'{pokemon1.name} has fainted.'
+        if pokemon1.hp < 0:
+            return f'{pokemon1.name} has fainted.'
+        elif pokemon2.hp < 0:
+            return f'{pokemon2.name} has fainted.'
+        else:
+            pass
     # If both poke's have negative damage, compare the attacks and the one with the most wins.
     else:
         if pokemon1.attack > pokemon2.attack:
@@ -161,7 +167,7 @@ def poke_battle(pokemon1, pokemon2):
                 return f'{pokemon1.name} has fainted.'
             # This defaults if ALL the other conditionals have failed. We could have more conditionals to fall into, but eventually someone has to win.
             else:
-                f'{pokemon2.name} has fainted.'
+                return f'{pokemon2.name} has fainted.'
                 # R.I.P.
 
 def updater(pokemon1, pokemon2, str_message):
@@ -205,7 +211,9 @@ def poke_fight():
             pokemon1 = Pokemon(poke_1, poke_df.at[poke_1, "hp"], poke_df.at[poke_1, "attack"], poke_df.at[poke_1, "defense"], poke_df.at[poke_1, "speed"])
             pokemon2 = Pokemon(poke_2, poke_df.at[poke_2, "hp"], poke_df.at[poke_2, "attack"], poke_df.at[poke_2, "defense"], poke_df.at[poke_2, "speed"])
             message = poke_battle(pokemon1, pokemon2)
+            print(message)
             updater(pokemon1, pokemon2, message)
+            print(poke_df)
         elif poke_1 in poke_df.index and poke_2 not in poke_df.index:
             message = f"{poke_2} is not a valid pokemon!"
         elif poke_1 not in poke_df.index and poke_2 in poke_df.index:
