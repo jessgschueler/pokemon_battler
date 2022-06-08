@@ -203,8 +203,8 @@ def poke_fight():
     global poke_df
     form = PokemonForm()
     if form.validate_on_submit() == True:
-        poke_1 = form.poke_1.data
-        poke_2 = form.poke_2.data
+        poke_1 = form.poke_1.data.title()
+        poke_2 = form.poke_2.data.title()
         if poke_1 == poke_2:
             message = f"{poke_1} won't fight another {poke_2}!"
         elif poke_1 in poke_df.index and poke_2 in poke_df.index:
