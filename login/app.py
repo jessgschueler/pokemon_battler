@@ -1,6 +1,6 @@
 from flask_login import LoginManager
-from flask import session, Flask, request, render_template, url_for
-
+from flask import session, Flask, redirect, request, render_template, url_for
+from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
     UserMixin,
     login_user,
