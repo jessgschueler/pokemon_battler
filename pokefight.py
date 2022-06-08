@@ -117,11 +117,11 @@ def updater(pokemon1, pokemon2, str_message):
     Interprets return of poke_battler() and updates pandas df with win and loss data
     """
     if pokemon1.name in str_message:
-        poke_df.at[pokemon1.name, "wins"] += 1
-        poke_df.at[pokemon2.name, "losses"] += 1
-    elif pokemon2.name in str_message:
-        poke_df.at[pokemon2.name, "wins"] += 1
         poke_df.at[pokemon1.name, "losses"] += 1
+        poke_df.at[pokemon2.name, "wins"] += 1
+    elif pokemon2.name in str_message:
+        poke_df.at[pokemon2.name, "losses"] += 1
+        poke_df.at[pokemon1.name, "wins"] += 1
     else:
         pass
 
