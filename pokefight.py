@@ -102,7 +102,7 @@ def poke_fight():
         else:
             message = f"{poke_1} and {poke_2} are not valid pokemon!"
     else:
-        message = "Please enter a valid pokemon!"
+        message = "Choose your Pokemon!"
     return render_template('index.html', form=form, message=message)
 
 if __name__ == "__main__":
