@@ -113,6 +113,9 @@ def poke_battle(pokemon1, pokemon2):
             break
 
 def updater(pokemon1, pokemon2, str_message):
+    """
+    Interprets return of poke_battler() and updates pandas df with win and loss data
+    """
     if pokemon1.name in str_message:
         poke_df.at[pokemon1.name, "wins"] += 1
         poke_df.at[pokemon2.name, "losses"] += 1
@@ -136,7 +139,7 @@ class PokemonForm(FlaskForm):
 @app.route("/", methods=["GET", "POST"])
 def poke_fight():
     """
-    HTTP GET: Query for Pokemon 
+    Accepts user input and runs it through our battler functions
     """
     global poke_df
     form = PokemonForm()
@@ -146,10 +149,8 @@ def poke_fight():
         if poke_1 in poke_df.index and poke_2 in poke_df.index:
             pokemon1 = Pokemon(poke_1, poke_df.at[poke_1, "hp"], poke_df.at[poke_1, "attack"], poke_df.at[poke_1, "defense"], poke_df.at[poke_1, "speed"])
             pokemon2 = Pokemon(poke_2, poke_df.at[poke_2, "hp"], poke_df.at[poke_2, "attack"], poke_df.at[poke_2, "defense"], poke_df.at[poke_2, "speed"])
-            print(pokemon1)
             message = poke_battle(pokemon1, pokemon2)
             updater(pokemon1, pokemon2, message)
-            print(poke_df.head())
         elif poke_1 in poke_df.index and poke_2 not in poke_df.index:
             message = f"{poke_2} is not a valid pokemon!"
         elif poke_1 not in poke_df.index and poke_2 in poke_df.index:
