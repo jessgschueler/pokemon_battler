@@ -214,6 +214,23 @@ def insert(df, table):
     )
     return client.load_table_from_dataframe(df, table, job_config=job_config)
 
+def update_tablebq(main_table, temp_table):
+    bqclient = bigquery.Client()
+    update = f"""
+        UPDATE {main_table} as i
+        SET wins = i.wins + n.wins,
+        losses = i.losses + n.losses
+        times_chosen = i.times_chosen + n_times_chosen
+        FROM {temp_table} as n
+        WHERE i.english_name = n.english_name
+"""
+    bqclient.query(update)
+
+def drop_tablebq(temp_table):
+    bqclient = bigquery.Client()
+    drop = f"DROP TABLE IF EXISTS {temp_table};"
+    bqclient.query(drop)
+
 
 app = Flask(__name__)
 
@@ -232,18 +249,13 @@ def poke_fight():
     """
     Accepts user input and runs it through our battler functions
     """
-    # global poke_df
+    global poke_df
     form = PokemonForm()
     #ensures our form has text input
     if form.validate_on_submit() == True:
         poke_1 = form.poke_1.data.title()
         poke_2 = form.poke_2.data.title()
-        poke_df = pd.DataFrame()
-        if poke_df.empty:
-            poke_df = bq_pull(poke_1, poke_2)
-        else:
-            battle_df = bq_pull(poke_1, poke_2)
-            poke_df.update(battle_df)
+        poke_df = bq_pull(poke_1, poke_2)
         poke_1id = poke_df.index[poke_df['english_name'] == poke_1][0]
         poke_2id = poke_df.index[poke_df['english_name'] == poke_2][0]
         pokemon1 = Pokemon(poke_1id, poke_df.at[poke_1id, "english_name"], poke_df.at[poke_1id, "hp"], poke_df.at[poke_1id, "attack"], poke_df.at[poke_1id, "defense"], poke_df.at[poke_1id, "speed"])
@@ -257,7 +269,9 @@ def poke_fight():
             message = poke_battle(pokemon1, pokemon2)
             #update our dataframe with win/loss/chosen info
             updater(poke_df, pokemon1, pokemon2, message)
-            # insert(poke_df, 'deb-01-346001.TEST.temp_table')
+            insert(poke_df, 'deb-01-346001.TEST.temp_table')
+            update_tablebq(main_table, temp_table)
+            drop_tablebq(temp_table)
         #checks that valid pokemon were entered
         elif pokemon1.id in poke_df.index and pokemon2.id not in poke_df.index:
             message = f"{poke_2} is not a valid pokemon!"
