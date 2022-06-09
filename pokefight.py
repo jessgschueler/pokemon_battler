@@ -179,15 +179,13 @@ def updater(data_in, pokemon1, pokemon2, str_message):
     Interprets return of poke_battler() and updates pandas df with win and loss data, as well as times chosen
     """
     if pokemon1.name in str_message:
-        data_in.at[pokemon1.id, "hp"] += 1
-        # data_in.at[pokemon2.name, "wins"] += 1
-        # data_in.at[pokemon1.name, "times_chosen"] += 1
-        # data_in.at[pokemon2.name, "times_chosen"] += 1
+        data_in.at[pokemon2.id, "wins"] += 1
+        data_in.at[pokemon1.id, "times_chosen"] += 1
+        data_in.at[pokemon2.id, "times_chosen"] += 1
     elif pokemon2.name in str_message:
-        data_in.at[pokemon2.id, "hp"] += 1
-        # data_in.at[pokemon1.name, "wins"] += 1
-        # data_in.at[pokemon1.name, "times_chosen"] += 1
-        # data_in.at[pokemon2.name, "times_chosen"] += 1
+        data_in.at[pokemon1.id, "wins"] += 1
+        data_in.at[pokemon1.id, "times_chosen"] += 1
+        data_in.at[pokemon2.id, "times_chosen"] += 1
     else:
         pass
 
@@ -195,8 +193,8 @@ def bq_pull(poke_1, poke_2):
     bqclient = bigquery.Client()
     query_string = f"""
     SELECT *
-        FROM deb-01-346001.pokemon.Pokedex
-        WHERE english_name LIKE '{poke_1}' OR english_name LIKE '{poke_2}'
+        FROM deb-01-346001.pokemon.poke_battler_data
+        WHERE name LIKE '{poke_1}' OR name LIKE '{poke_2}'
     """
     dataframe = (
         bqclient.query(query_string)
@@ -210,26 +208,31 @@ def insert(df, table):
     client = bigquery.Client()
     job_config = bigquery.LoadJobConfig(
         schema=[
-        bigquery.SchemaField("national_number", bigquery.enums.SqlTypeNames.INTEGER)]
+        bigquery.SchemaField("national_number", bigquery.enums.SqlTypeNames.INTEGER)],
+        create_disposition='CREATE_IF_NEEDED',
+        autodetect=True
     )
-    return client.load_table_from_dataframe(df, table, job_config=job_config)
+    job = client.load_table_from_dataframe(df, table, job_config=job_config)
+    job.result()
 
 def update_tablebq(main_table, temp_table):
     bqclient = bigquery.Client()
     update = f"""
         UPDATE {main_table} as i
         SET wins = i.wins + n.wins,
-        losses = i.losses + n.losses
-        times_chosen = i.times_chosen + n_times_chosen
+        losses = i.losses + n.losses,
+        times_chosen = i.times_chosen + n.times_chosen
         FROM {temp_table} as n
-        WHERE i.english_name = n.english_name
+        WHERE i.name = n.name
 """
-    bqclient.query(update)
+    job = bqclient.query(update)
+    job.result()
+
 
 def drop_tablebq(temp_table):
     bqclient = bigquery.Client()
     drop = f"DROP TABLE IF EXISTS {temp_table};"
-    bqclient.query(drop)
+    return bqclient.query(drop)
 
 
 app = Flask(__name__)
@@ -256,10 +259,10 @@ def poke_fight():
         poke_1 = form.poke_1.data.title()
         poke_2 = form.poke_2.data.title()
         poke_df = bq_pull(poke_1, poke_2)
-        poke_1id = poke_df.index[poke_df['english_name'] == poke_1][0]
-        poke_2id = poke_df.index[poke_df['english_name'] == poke_2][0]
-        pokemon1 = Pokemon(poke_1id, poke_df.at[poke_1id, "english_name"], poke_df.at[poke_1id, "hp"], poke_df.at[poke_1id, "attack"], poke_df.at[poke_1id, "defense"], poke_df.at[poke_1id, "speed"])
-        pokemon2 = Pokemon(poke_2id, poke_df.at[poke_2id, "english_name"], poke_df.at[poke_2id, "hp"], poke_df.at[poke_2id, "attack"], poke_df.at[poke_2id, "defense"], poke_df.at[poke_2id, "speed"])
+        poke_1id = poke_df.index[poke_df['name'] == poke_1][0]
+        poke_2id = poke_df.index[poke_df['name'] == poke_2][0]
+        pokemon1 = Pokemon(poke_1id, poke_df.at[poke_1id, "name"], poke_df.at[poke_1id, "hp"], poke_df.at[poke_1id, "attack"], poke_df.at[poke_1id, "defense"], poke_df.at[poke_1id, "speed"])
+        pokemon2 = Pokemon(poke_2id, poke_df.at[poke_2id, "name"], poke_df.at[poke_2id, "hp"], poke_df.at[poke_2id, "attack"], poke_df.at[poke_2id, "defense"], poke_df.at[poke_2id, "speed"])
         #checks if the same pokemon was entered twice
         if poke_1 == poke_2:
             message = f"{poke_1} won't fight another {poke_2}!"
@@ -269,9 +272,9 @@ def poke_fight():
             message = poke_battle(pokemon1, pokemon2)
             #update our dataframe with win/loss/chosen info
             updater(poke_df, pokemon1, pokemon2, message)
-            insert(poke_df, 'deb-01-346001.TEST.temp_table')
-            update_tablebq(main_table, temp_table)
-            drop_tablebq(temp_table)
+            insert(poke_df, 'deb-01-346001.pokemon.temp_table')
+            update_tablebq("deb-01-346001.pokemon.poke_battler_data", "deb-01-346001.pokemon.temp_table")
+            drop_tablebq('deb-01-346001.pokemon.temp_table')
         #checks that valid pokemon were entered
         elif pokemon1.id in poke_df.index and pokemon2.id not in poke_df.index:
             message = f"{poke_2} is not a valid pokemon!"
