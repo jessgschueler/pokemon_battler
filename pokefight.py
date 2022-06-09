@@ -42,6 +42,7 @@ def df_drop_add(dataframe):
     )
     # Columns to add to dataframe
     col_list=['wins','losses']
+    # loop through each column in our list, to see if wins/losses exists, if it doesnt create them and set there values to 0
     for col in col_list:
         if col not in dataframe.columns:
             dataframe['wins']=0
@@ -53,6 +54,7 @@ def df_drop_add(dataframe):
 poke_df = df_drop_add(poke_df)   
 
 class Pokemon():
+    # instantiate a class with values needed for battler
     def __init__(self, name, hp, attack, defense, speed):
         self.name = name
         self.hp = hp
@@ -182,7 +184,6 @@ def updater(pokemon1, pokemon2, str_message):
         poke_df.at[pokemon1.name, "wins"] += 1
     else:
         pass
-
 
 app = Flask(__name__)
 
