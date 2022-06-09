@@ -5,56 +5,59 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 import pandas as pd
 
-def df_import(csv_file):
-    poke_df = pd.read_csv(csv_file, index_col="english_name")
-    return poke_df
+from google.cloud import bigquery
 
-poke_df = df_import('pokemon.csv')
+# def df_import(csv_file):
+#     poke_df = pd.read_csv(csv_file, index_col="english_name")
+#     return poke_df
 
-def df_drop_add(dataframe):
-    """
-    ## df_drop_add(dataframe)
-    removes a specific list of columns & adds a 'wins' and 'losses' column
+# poke_df = df_import('pokemon.csv')
 
-    *dataframe:
-    - takes a pandas dataframe
-    """
-    # Columns to drop from dataframe
-    dataframe.drop(columns=[
-        'japanese_name',
-        'percent_male',
-        'percent_female',
-        'capture_rate',
-        'base_egg_steps',
-        'evochain_0',
-        'evochain_1',
-        'evochain_2',
-        'evochain_3',
-        'evochain_4',
-        'evochain_5',
-        'evochain_6',
-        'gigantamax',
-        'mega_evolution',
-        'mega_evolution_alt',
-    ],   
-        axis=1,
-        inplace=True,
-    )
-    # Columns to add to dataframe
-    col_list=['wins','losses','times_chosen']
-    for col in col_list:
-        if col not in dataframe.columns:
-            dataframe['wins']=0
-            dataframe['losses']=0
-            dataframe['times_chosen']
-        else:
-            pass
-    return dataframe
+# def df_drop_add(dataframe):
+#     """
+#     ## df_drop_add(dataframe)
+#     removes a specific list of columns & adds a 'wins' and 'losses' column
 
-poke_df = df_drop_add(poke_df)   
+#     *dataframe:
+#     - takes a pandas dataframe
+#     """
+#     # Columns to drop from dataframe
+#     dataframe.drop(columns=[
+#         'japanese_name',
+#         'percent_male',
+#         'percent_female',
+#         'capture_rate',
+#         'base_egg_steps',
+#         'evochain_0',
+#         'evochain_1',
+#         'evochain_2',
+#         'evochain_3',
+#         'evochain_4',
+#         'evochain_5',
+#         'evochain_6',
+#         'gigantamax',
+#         'mega_evolution',
+#         'mega_evolution_alt',
+#     ],   
+#         axis=1,
+#         inplace=True,
+#     )
+#     # Columns to add to dataframe
+#     col_list=['wins','losses','times_chosen']
+#     for col in col_list:
+#         if col not in dataframe.columns:
+#             dataframe['wins']=0
+#             dataframe['losses']=0
+#             dataframe['times_chosen']
+#         else:
+#             pass
+#     return dataframe
+
+# poke_df = df_drop_add(poke_df)   
 
 class Pokemon():
-    def __init__(self, name, hp, attack, defense, speed):
+    def __init__(self, id, name, hp, attack, defense, speed):
+        self.id = id
         self.name = name
         self.hp = hp
         self.attack = attack
@@ -171,22 +174,45 @@ def poke_battle(pokemon1, pokemon2):
                 return f'{pokemon2.name} has fainted.'
                 # R.I.P.
 
-def updater(pokemon1, pokemon2, str_message):
+def updater(data_in, pokemon1, pokemon2, str_message):
     """
     Interprets return of poke_battler() and updates pandas df with win and loss data, as well as times chosen
     """
     if pokemon1.name in str_message:
-        poke_df.at[pokemon1.name, "losses"] += 1
-        poke_df.at[pokemon2.name, "wins"] += 1
-        poke_df.at[pokemon1.name, "times_chosen"] += 1
-        poke_df.at[pokemon2.name, "times_chosen"] += 1
+        data_in.at[pokemon1.id, "hp"] += 1
+        # data_in.at[pokemon2.name, "wins"] += 1
+        # data_in.at[pokemon1.name, "times_chosen"] += 1
+        # data_in.at[pokemon2.name, "times_chosen"] += 1
     elif pokemon2.name in str_message:
-        poke_df.at[pokemon2.name, "losses"] += 1
-        poke_df.at[pokemon1.name, "wins"] += 1
-        poke_df.at[pokemon1.name, "times_chosen"] += 1
-        poke_df.at[pokemon2.name, "times_chosen"] += 1
+        data_in.at[pokemon2.id, "hp"] += 1
+        # data_in.at[pokemon1.name, "wins"] += 1
+        # data_in.at[pokemon1.name, "times_chosen"] += 1
+        # data_in.at[pokemon2.name, "times_chosen"] += 1
     else:
         pass
+
+def bq_pull(poke_1, poke_2):
+    bqclient = bigquery.Client()
+    query_string = f"""
+    SELECT *
+        FROM deb-01-346001.pokemon.Pokedex
+        WHERE english_name LIKE '{poke_1}' OR english_name LIKE '{poke_2}'
+    """
+    dataframe = (
+        bqclient.query(query_string)
+        .result()
+        .to_dataframe()
+    )
+    dataframe.set_index("national_number", inplace=True)
+    return dataframe
+
+def insert(df, table):
+    client = bigquery.Client()
+    job_config = bigquery.LoadJobConfig(
+        schema=[
+        bigquery.SchemaField("national_number", bigquery.enums.SqlTypeNames.INTEGER)]
+    )
+    return client.load_table_from_dataframe(df, table, job_config=job_config)
 
 
 app = Flask(__name__)
@@ -206,27 +232,31 @@ def poke_fight():
     """
     Accepts user input and runs it through our battler functions
     """
-    global poke_df
+    # global poke_df
     form = PokemonForm()
     #ensures our form has text input
     if form.validate_on_submit() == True:
         poke_1 = form.poke_1.data.title()
         poke_2 = form.poke_2.data.title()
+        poke_df = bq_pull(poke_1, poke_2)
+        poke_1id = poke_df.index[poke_df['english_name'] == poke_1][0]
+        poke_2id = poke_df.index[poke_df['english_name'] == poke_2][0]
+        pokemon1 = Pokemon(poke_1id, poke_df.at[poke_1id, "english_name"], poke_df.at[poke_1id, "hp"], poke_df.at[poke_1id, "attack"], poke_df.at[poke_1id, "defense"], poke_df.at[poke_1id, "speed"])
+        pokemon2 = Pokemon(poke_2id, poke_df.at[poke_2id, "english_name"], poke_df.at[poke_2id, "hp"], poke_df.at[poke_2id, "attack"], poke_df.at[poke_2id, "defense"], poke_df.at[poke_2id, "speed"])
         #checks if the same pokemon was entered twice
         if poke_1 == poke_2:
             message = f"{poke_1} won't fight another {poke_2}!"
         #checks to see if entered pokemon are in our database
-        elif poke_1 in poke_df.index and poke_2 in poke_df.index:
-            pokemon1 = Pokemon(poke_1, poke_df.at[poke_1, "hp"], poke_df.at[poke_1, "attack"], poke_df.at[poke_1, "defense"], poke_df.at[poke_1, "speed"])
-            pokemon2 = Pokemon(poke_2, poke_df.at[poke_2, "hp"], poke_df.at[poke_2, "attack"], poke_df.at[poke_2, "defense"], poke_df.at[poke_2, "speed"])
+        elif pokemon1.id in poke_df.index and pokemon2.id in poke_df.index:
             #runs pokemon through our battler
             message = poke_battle(pokemon1, pokemon2)
             #update our dataframe with win/loss/chosen info
-            updater(pokemon1, pokemon2, message)
+            updater(poke_df, pokemon1, pokemon2, message)
+            insert(poke_df, 'deb-01-346001.TEST.temp_table')
         #checks that valid pokemon were entered
-        elif poke_1 in poke_df.index and poke_2 not in poke_df.index:
+        elif pokemon1.id in poke_df.index and pokemon2.id not in poke_df.index:
             message = f"{poke_2} is not a valid pokemon!"
-        elif poke_1 not in poke_df.index and poke_2 in poke_df.index:
+        elif pokemon1.id not in poke_df.index and pokemon2.id in poke_df.index:
             message = f"{poke_1} is not a valid pokemon!"
         else:
             message = f"{poke_1} and {poke_2} are not valid pokemon!"
@@ -234,6 +264,7 @@ def poke_fight():
         message = "Choose your Pokemon!"
     #renders and displays html template
     return render_template('index.html', form=form, message=message)
+
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=8080, debug=True)
