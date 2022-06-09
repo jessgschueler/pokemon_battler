@@ -238,7 +238,12 @@ def poke_fight():
     if form.validate_on_submit() == True:
         poke_1 = form.poke_1.data.title()
         poke_2 = form.poke_2.data.title()
-        poke_df = bq_pull(poke_1, poke_2)
+        poke_df = pd.DataFrame()
+        if poke_df.empty:
+            poke_df = bq_pull(poke_1, poke_2)
+        else:
+            battle_df = bq_pull(poke_1, poke_2)
+            poke_df.update(battle_df)
         poke_1id = poke_df.index[poke_df['english_name'] == poke_1][0]
         poke_2id = poke_df.index[poke_df['english_name'] == poke_2][0]
         pokemon1 = Pokemon(poke_1id, poke_df.at[poke_1id, "english_name"], poke_df.at[poke_1id, "hp"], poke_df.at[poke_1id, "attack"], poke_df.at[poke_1id, "defense"], poke_df.at[poke_1id, "speed"])
@@ -252,7 +257,7 @@ def poke_fight():
             message = poke_battle(pokemon1, pokemon2)
             #update our dataframe with win/loss/chosen info
             updater(poke_df, pokemon1, pokemon2, message)
-            insert(poke_df, 'deb-01-346001.TEST.temp_table')
+            # insert(poke_df, 'deb-01-346001.TEST.temp_table')
         #checks that valid pokemon were entered
         elif pokemon1.id in poke_df.index and pokemon2.id not in poke_df.index:
             message = f"{poke_2} is not a valid pokemon!"
