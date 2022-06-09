@@ -1,13 +1,13 @@
-<center> 
-<h1>Pokemon Battler</h1>
-</center>  
+
+<h1>Pokemon Battler</h1>  
+
 
 ![titlecard](./img/battler_trans.png)
 
 
 [Link to project](www.water.com/)
 
-###  Contributors:
+###  Contributors:  
 
 - [Jess Schueler](https://github.com/jessgschueler)
 
@@ -17,10 +17,10 @@
 
 - [Dylan Peterson](https://github.com/DyPeterson)
 
-###  Description
+###  Description  
 Team project that creates an API out of a online TSV. The API allows you to battle with two Pokemon from dataset. After a battle is completed It updates the win/losses respectively. The dataset and API are also hosted on the cloud.
 
-### Technologies Used:
+### Technologies Used:  
 
 - [Python](https://www.python.org/)
 - [Pandas](https://pandas.pydata.org/)
@@ -31,12 +31,12 @@ Team project that creates an API out of a online TSV. The API allows you to batt
 - [Bootstrap](https://getbootstrap.com/)
 - [WTForms](https://wtforms.readthedocs.io/en/3.0.x/#)
 
-#### Programs used:
+#### Programs used:  
 
 - [Visual Code Studio](https://code.visualstudio.com/)
 - [Windows Terminal](https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701?hl=en-us&gl=US) (Running: [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install) ([ubuntu 20.04](https://releases.ubuntu.com/20.04/)))
 
-### Setup & Installation:
+### Setup & Installation:  
 
 1. Through the terminal like [GitBash](https://git-scm.com/downloads) 
 
@@ -96,18 +96,18 @@ Team project that creates an API out of a online TSV. The API allows you to batt
 	
 1. Finally you can use the website from the link provided [here](www.google.com)
 
-#### Link to project on GitHub:
+#### Link to project on GitHub:  
 [GitHub Repository](https://github.com/BriChavez/pokemon_battler)
 
-### Details
+### Details  
 This project was an open-ended prompt to showcase the knowledge we have learned so far while enrolled in [Data Stack Academy](https://www.datastack.academy/). As a team we decided to use a Kaggle Pokemon dataset to host a website API that allows the user to input two different Pokemon and have them battle each other. And also update our data with a win or a loss depending on the results of the battle. This project uses a myriad of tools to help us arrive at the goal. It uses flask to host the API, Google App Engine to host our created API and Pandas to code our data edits as user inputs happen. 
 
 
-### Known Bugs
+### Known Bugs  
 
  No known bugs at this time.
 
-### Copyright 2022
+### Copyright 2022  
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
