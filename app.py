@@ -9,7 +9,7 @@ from flask import (Flask,
 
 class User:
     """create a class for user"""
-    def __init__(self, id, username, password):
+    def __init__(self, name, , password):
         # set id, username, and password for user
         self.id = id
         self.username = username
