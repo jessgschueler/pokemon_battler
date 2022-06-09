@@ -7,6 +7,55 @@ import pandas as pd
 import pandas_gbq
 import sys
 
+def df_import(csv_file):
+    poke_df = pd.read_csv(csv_file, index_col="english_name")
+    return poke_df
+
+poke_df = df_import('pokemon.csv')
+
+def df_drop_add(dataframe):
+    """
+    ## df_drop_add(dataframe)
+    removes a specific list of columns & adds a 'wins' and 'losses' column
+
+    *dataframe:
+    - takes a pandas dataframe
+    """
+    #rename name column
+    dataframe.rename(columns={"english_name": "name"}, inplace=True)
+    # Columns to drop from dataframe
+    dataframe.drop(columns=[
+        'japanese_name',
+        'percent_male',
+        'percent_female',
+        'capture_rate',
+        'base_egg_steps',
+        'evochain_0',
+        'evochain_1',
+        'evochain_2',
+        'evochain_3',
+        'evochain_4',
+        'evochain_5',
+        'evochain_6',
+        'gigantamax',
+        'mega_evolution',
+        'mega_evolution_alt',
+    ],   
+        axis=1,
+        inplace=True,
+    )
+    # Columns to add to dataframe
+    col_list=['wins','losses','times_chosen']
+    for col in col_list:
+        if col not in dataframe.columns:
+            dataframe['wins']=0
+            dataframe['losses']=0
+            dataframe['times_chosen']
+        else:
+            pass
+    return dataframe
+ 
+
 logging.basicConfig(format='[%(levelname)-5s][%(asctime)s][%(module)s:%(lineno)04d] : %(message)s',
                     level=INFO,
                     stream=sys.stderr)
@@ -37,7 +86,7 @@ def load_to_gbq() -> None:
 
     # Loading transformed dataframe into google big query with the specified project/dataset as targets and a specified table schema.
     logger.info(f"Loading dataframe to: '{dataset.dataset_id}'...")
-    poke_df = pd.read_csv("pokemon.csv")
+    poke_df = df_drop_add(poke_df) 
     pandas_gbq.to_gbq(poke_df, table_id, project_id=project_id, if_exists="fail", api_method="load_csv", table_schema=[
         {'name': 'national_number', 'type': 'INT64'}, 
         {'name': 'gen', 'type': 'STRING'}, 
