@@ -5,7 +5,6 @@ import logging
 from logging import INFO
 import pandas as pd
 import pandas_gbq
-from pokefight import poke_df
 import sys
 
 logging.basicConfig(format='[%(levelname)-5s][%(asctime)s][%(module)s:%(lineno)04d] : %(message)s',
@@ -39,8 +38,8 @@ def load_to_gbq() -> None:
     # Loading transformed dataframe into google big query with the specified project/dataset as targets and a specified table schema.
     logger.info(f"Loading dataframe to: '{dataset.dataset_id}'...")
     # Reset dataframe index before loading to bigquery, because bigquery does not support/display dataframe indexes. English_name would not show in table. Set to new df so the old one's index can still be called for battler functions
-    no_index_poke_df = poke_df.reset_index()
-    pandas_gbq.to_gbq(no_index_poke_df, table_id, project_id=project_id, if_exists="fail", api_method="load_csv", table_schema=[
+    poke_df = pd.read_csv("pokemon.csv")
+    pandas_gbq.to_gbq(poke_df, table_id, project_id=project_id, if_exists="fail", api_method="load_csv", table_schema=[
         {'name': 'national_number', 'type': 'INT64'}, 
         {'name': 'gen', 'type': 'STRING'}, 
         {'name': 'name', 'type': 'STRING'}, 
