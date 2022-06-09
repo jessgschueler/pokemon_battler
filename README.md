@@ -5,7 +5,6 @@
 ![titlecard](./img/battler_trans.png)
 
 
-[Link to project](www.water.com/)
 
 ###  Contributors:  
 
@@ -94,7 +93,6 @@ Team project that creates an API out of a online TSV. The API allows you to batt
 	
 	6. Run the `main.py`  with the command `python main.py`to run the API locally
 	
-1. Finally you can use the website from the link provided [here](www.google.com)
 
 #### Link to project on GitHub:  
 [GitHub Repository](https://github.com/BriChavez/pokemon_battler)
@@ -105,7 +103,7 @@ This project was an open-ended prompt to showcase the knowledge we have learned 
 
 ### Known Bugs  
 
- No known bugs at this time.
+- Currently are not able to deploy the app to the cloud.
 
 ### Copyright 2022  
 
