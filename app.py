@@ -19,18 +19,23 @@ class User:
         return f'<User: {self.username}>'
 
 """set users as a list to store for now"""
-users = []
-# give the list some data to play with
-users.append(User(id = 1, username = 'bri', password = 'password'))
-users.append(User(id = 2, username= 'jess', password = 'password'))
-users.append(User(id = 3, username= 'dylan', password = 'password'))
-users.append(User(id = 4, username= 'jarret', password = 'password'))
+columns = ['id', 'username', 'password', 'wins', 'losses']
+
+
+users = [(1, 'bri', 'password', 0, 0),
+         (2, 'jess', 'password', 0, 0),
+         (3, 'dylan', 'password', 0, 0),
+         (4, 'jarret', 'password', 0, 0)]
+users_df = pd.DataFrame(
+    users, columns=['id', 'username', 'password', 'wins', 'losses'])
 
 
 """create flask app"""
 app = Flask(__name__)
 # name our secret key something
 app.secret_key = 'somesecretkey'
+
+
 
 
 """ before the page asks for user name"""
@@ -43,6 +48,10 @@ def before_request():
         user = [x for x in users if x.id == session['user_id']][0]
         # anywhere we have access to g (pretty much anywhere, we will have access to the user)
         g.user = user
+
+@ app.route('/new_user', methods=['GET', 'POST'])
+df new_trainer():
+
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
