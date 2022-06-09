@@ -1,4 +1,4 @@
-# load to big query
+# loads the initial pokemon csv file to a Google BigQuery table for us to later pull from, perform data transformations on, carry out our pokebattler functions and send the new data returned back up to the BigQuery table.
 
 from google.cloud import bigquery
 import logging
@@ -16,15 +16,15 @@ def load_to_gbq() -> None:
     """
     creates a Google BigQuery dataset and table, and loads a pandas dataframe to it
     """
-    # Instantiate big query client api which will create a dataset
+    # Instantiate bigquery client api which will create a dataset
     client = bigquery.Client()
     # Tell the client to use "poke_battler_table" as the dataset name to create in the project
     dataset_id = f"{client.project}.poke_battler_data"
     # Pass dataset_id to bigquery's Dataset class to build a reference
     dataset = bigquery.Dataset(dataset_id)
-    # Assign the datasets server location to US
+    # Assign the dataset's server location to US
     dataset.location = "US"
-    # Tell the client to create the dataset on google big query with the completed information
+    # Tell the client to create the dataset on google bigquery with the completed information
     dataset = client.create_dataset(dataset, exists_ok=False, timeout=30)
     # If successful, log the creation of the dataset
     logger.info(f"Created dataset: '{dataset.dataset_id}' in '{client.project}'.")
@@ -37,7 +37,6 @@ def load_to_gbq() -> None:
 
     # Loading transformed dataframe into google big query with the specified project/dataset as targets and a specified table schema.
     logger.info(f"Loading dataframe to: '{dataset.dataset_id}'...")
-    # Reset dataframe index before loading to bigquery, because bigquery does not support/display dataframe indexes. English_name would not show in table. Set to new df so the old one's index can still be called for battler functions
     poke_df = pd.read_csv("pokemon.csv")
     pandas_gbq.to_gbq(poke_df, table_id, project_id=project_id, if_exists="fail", api_method="load_csv", table_schema=[
         {'name': 'national_number', 'type': 'INT64'}, 
