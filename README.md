@@ -100,7 +100,7 @@ Team project that creates an API out of a online TSV. The API allows you to batt
 [GitHub Repository](https://github.com/BriChavez/pokemon_battler)
 
 ### Details  
-This project was an open-ended prompt to showcase the knowledge we have learned so far while enrolled in [Data Stack Academy](https://www.datastack.academy/). As a team we decided to use a Kaggle Pokemon dataset to host a website API that allows the user to input two different Pokemon and have them battle each other. And also update our data with a win or a loss depending on the results of the battle. This project uses a myriad of tools to help us arrive at the goal. It uses flask to host the API, Google App Engine to host our created API and Pandas to code our data edits as user inputs happen. 
+This project was an open-ended prompt to showcase the knowledge we have learned so far while enrolled in [Data Stack Academy](https://www.datastack.academy/). As a team we decided to use a Kaggle Pokemon dataset to host a website API that allows the user to input two different Pokemon and have them battle each other. And also update our data with a win or a loss depending on the results of the battle. This project uses a myriad of tools to help us arrive at the goal. It uses flask to host the API, Google App Engine to host our created API and Pandas to code our data edits as user inputs happen. It also allows for us to query the data on Google BigQuery.
 
 
 ### Known Bugs  
