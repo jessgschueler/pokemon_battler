@@ -190,6 +190,9 @@ def updater(data_in, pokemon1, pokemon2, str_message):
         pass
 
 def bq_pull(poke_1, poke_2):
+    """
+    BigQuery function to pull pokemon from our dataset and return pandas df
+    """
     bqclient = bigquery.Client()
     query_string = f"""
     SELECT *
@@ -205,6 +208,9 @@ def bq_pull(poke_1, poke_2):
     return dataframe
 
 def insert(df, table):
+    """
+    BigQuery function to insert updated df into a temp table
+    """
     client = bigquery.Client()
     job_config = bigquery.LoadJobConfig(
         schema=[
@@ -216,6 +222,9 @@ def insert(df, table):
     job.result()
 
 def update_tablebq(main_table, temp_table):
+    """
+    BigQuery function that merges the temp table onto the main table
+    """
     bqclient = bigquery.Client()
     update = f"""
         UPDATE {main_table} as i
@@ -230,6 +239,9 @@ def update_tablebq(main_table, temp_table):
 
 
 def drop_tablebq(temp_table):
+    """
+    BigQuery function to drop temp_table after merge
+    """
     bqclient = bigquery.Client()
     drop = f"DROP TABLE IF EXISTS {temp_table};"
     return bqclient.query(drop)
@@ -250,7 +262,7 @@ class PokemonForm(FlaskForm):
 @app.route("/", methods=["GET", "POST"])
 def poke_fight():
     """
-    Accepts user input and runs it through our battler functions
+    Accepts user input, runs it through our battler functions, and updates bigquery.
     """
     global poke_df
     form = PokemonForm()
@@ -258,9 +270,12 @@ def poke_fight():
     if form.validate_on_submit() == True:
         poke_1 = form.poke_1.data.title()
         poke_2 = form.poke_2.data.title()
+        #pulls pokemon from bigquery into df
         poke_df = bq_pull(poke_1, poke_2)
+        #sets index
         poke_1id = poke_df.index[poke_df['name'] == poke_1][0]
         poke_2id = poke_df.index[poke_df['name'] == poke_2][0]
+        #creates instances of pokemon class
         pokemon1 = Pokemon(poke_1id, poke_df.at[poke_1id, "name"], poke_df.at[poke_1id, "hp"], poke_df.at[poke_1id, "attack"], poke_df.at[poke_1id, "defense"], poke_df.at[poke_1id, "speed"])
         pokemon2 = Pokemon(poke_2id, poke_df.at[poke_2id, "name"], poke_df.at[poke_2id, "hp"], poke_df.at[poke_2id, "attack"], poke_df.at[poke_2id, "defense"], poke_df.at[poke_2id, "speed"])
         #checks if the same pokemon was entered twice
@@ -272,8 +287,11 @@ def poke_fight():
             message = poke_battle(pokemon1, pokemon2)
             #update our dataframe with win/loss/chosen info
             updater(poke_df, pokemon1, pokemon2, message)
+            #insert into temp table
             insert(poke_df, 'deb-01-346001.pokemon.temp_table')
+            #merge temp table with main
             update_tablebq("deb-01-346001.pokemon.poke_battler_data", "deb-01-346001.pokemon.temp_table")
+            #drop temp table
             drop_tablebq('deb-01-346001.pokemon.temp_table')
         #checks that valid pokemon were entered
         elif pokemon1.id in poke_df.index and pokemon2.id not in poke_df.index:
