@@ -1,4 +1,6 @@
-##  Pokemon Battler
+<center> 
+<h1>Pokemon Battler</h1>
+</center>  
 
 ![titlecard](./img/battler_trans.png)
 
