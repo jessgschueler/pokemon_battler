@@ -249,7 +249,7 @@ def drop_tablebq(temp_table):
 
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = 'TQIcpo6gbADjldiP9o9XirAl0LliqYpw'
+app.config["SECRET_KEY"] = ********************
 
 Bootstrap(app)
 
